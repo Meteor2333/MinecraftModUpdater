@@ -60,12 +60,12 @@
       aria-live="polite"
       role="status"
     >
+      <span class="sr-only">令牌剩余</span>
       {{
         this.modrinth.rateLimitLimit -
           Math.max(this.modrinth.rateLimitRemaining, 0)
       }}
       / {{ this.modrinth.rateLimitLimit }}
-      <span class="sr-only">tokens remaining.</span>
     </span>
   }
 </button>

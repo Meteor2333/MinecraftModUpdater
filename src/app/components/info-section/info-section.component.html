@@ -24,7 +24,7 @@
             type="button"
             class="rounded-md text-gray-400 hover:text-gray-500 focus:text-gray-800 dark:text-slate-200 dark:hover:text-slate-100 dark:focus:text-white"
           >
-            <span class="sr-only">Close</span>
+            <span class="sr-only">关闭</span>
             <svg
               class="h-6 w-6"
               xmlns="http://www.w3.org/2000/svg"
@@ -49,112 +49,104 @@
         >
           <div class="info-section">
             <h2 id="modal-title" class="text-lg font-semibold">
-              Minecraft Mod Updater and Loader Migrator
+              我的世界模组更新器
             </h2>
             <p>
-              This tool helps you find updates for and lets you migrate
-              Minecraft Java Mods using the
+              此工具可以帮助你通过
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
                 href="https://modrinth.com/"
-                >Modrinth<span class="sr-only">(opens in new tab)</span></a
+                >Modrinth API<span class="sr-only">（在新标签页打开）</span></a
               >
-              API by simply uploading them as .jar files.
+              查找更新并迁移你的 Minecraft Java 模组，只需将它们作为 .jar 文件上传即可
             </p>
-            <h3 class="text-lg font-semibold">How to use:</h3>
+            <h3 class="text-lg font-semibold">使用教程:</h3>
             <ol>
-              <li>
-                Select the desired mod loader (Fabric / Forge / Quilt /
-                NeoForge).
-              </li>
-              <li>Select the Minecraft version you want to target.</li>
-              <li>
-                Upload your mod(s) by dragging and dropping them onto the page.
-              </li>
-              <li>Let the tool find the targeted versions of your mods.</li>
+              <li>选择你的模组加载器（Fabric / Forge / Quilt / NeoForge）</li>
+              <li>选择你的目标 Minecraft 版本</li>
+              <li>上传你的模组或直接拖放到此页面上</li>
+              <li>工具将自动查找目标版本的模组供你下载</li>
             </ol>
             <p>
-              You can also update resource packs (.zip), shaders (.zip) and
-              modpacks (.mrpack) and downgrade mods to a specific version.
+              你也可以上传资源包（.zip）、光影（.zip）和整合包（.mrpack），
+              并且支持降级到特定版本
               <br />
-              Modpack developers can use this tool to update the mods contained
-              in their modpacks to the latest versions by uploading the
-              modrinth.index.json file.
+              模组包开发者同样可以使用这个工具，只需上传 modrinth.index.json 文件，
+              工具将自动更新模组包中的模组到最新版本
             </p>
-            <h3 class="text-lg font-semibold">Modrinth's Rate Limit:</h3>
+            <h3 class="text-lg font-semibold">速率限制:</h3>
             <p>
-              Please note that this tool relies on the Modrinth API for fetching
-              mod updates. Modrinth has a rate limit in place to prevent abuse.
-              If you hit the rate limit, you will need to wait for a few
-              seconds. You are able to process at most ~290 mods per minute.
-              Currently you have used
+              需要注意的是，Modrinth 设置了速率限制以防止滥用。
+              由于此工具依赖 Modrinth API 来获取模组更新，所以如果你触发了速率限制，需要等待几秒钟。
+              每分钟最多可以处理大约 290 个模组，当前你已经使用了
               {{
                 (this.modrinth.rateLimitLimit ?? 0) -
                   Math.max(this.modrinth.rateLimitRemaining ?? 0, 0)
               }}
-              of {{ this.modrinth.rateLimitLimit ?? 0 }}
-              tokens
+              / {{ this.modrinth.rateLimitLimit ?? 0 }}
+              个令牌
               @if (
                 modrinth.getRateLimitSecondsUntilReset$ | async;
                 as resetIn
               ) {
-                (resets in {{ resetIn }} seconds
-                {{ modrinth.isClientSideRateLimit ? "(approximated)" : "" }})
+                (将在 {{ resetIn }} 秒后重置
+                {{ modrinth.isClientSideRateLimit ? "（估计值）" : "" }})
               }
-              .
             </p>
-            <h3 class="text-lg font-semibold">Attributions:</h3>
+            <h3 class="text-lg font-semibold">关于:</h3>
             <p>
-              This tool was made with
+              此工具使用
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
                 href="https://angular.io/"
-                >Angular<span class="sr-only">(opens in new tab)</span></a
+                >Angular<span class="sr-only">（在新标签页打开）</span></a
               >
-              and
+              和
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
                 href="https://tailwindcss.com/"
-                >Tailwind<span class="sr-only">(opens in new tab)</span></a
+                >Tailwind<span class="sr-only">（在新标签页打开）</span></a
               >
-              using icons from
+              制作，图标由
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
                 href="https://heroicons.com/"
-                >Heroicons<span class="sr-only">(opens in new tab)</span></a
+                >Heroicons<span class="sr-only">（在新标签页打开）</span></a
               >
-              and
+              和
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
                 href="https://iconoir.com/"
-                >Iconoir<span class="sr-only">(opens in new tab)</span></a
-              >. The dropzone was created using the
+                >Iconoir<span class="sr-only">（在新标签页打开）</span></a
+              >
+              提供。文件拖拽功能使用
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
                 href="https://www.npmjs.com/package/ngx-dropzone"
-                >ngx-dropzone library<span class="sr-only"
-                  >(opens in new tab)</span
+                >ngx-dropzone<span class="sr-only"
+                  >（在新标签页打开）</span
                 ></a
-              >. The source code is available on
+              >
+              库实现。本工具开源在
               <a
                 target="_blank"
                 rel="noopener"
                 referrerpolicy="no-referrer"
-                href="https://github.com/IsAvaible/AngularModUpdater"
-                >GitHub<span class="sr-only">(opens in new tab)</span></a
-              >.
+                href="https://github.com/Meteor2333/MinecraftModUpdater"
+                >GitHub<span class="sr-only">（在新标签页打开）</span></a
+              >
             </p>
 <!--            Curseforge Support is currently disabled due to CORS issues -->
 <!--            <label class="inline-flex cursor-pointer items-center">-->
@@ -169,7 +161,7 @@
             type="button"
             class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:border-slate-900 dark:bg-slate-800 dark:text-slate-200 hover:dark:bg-slate-700 sm:mt-0 sm:ml-3 sm:hidden sm:w-auto sm:text-sm"
           >
-            Close
+            关闭
           </button>
         </div>
       </div>

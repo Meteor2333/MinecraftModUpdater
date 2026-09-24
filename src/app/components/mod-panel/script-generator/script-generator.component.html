@@ -13,22 +13,19 @@
     id="script-generator-title"
     class="mb-4 text-center text-2xl font-bold dark:text-slate-100"
   >
-    Generate Cleanup & Update Script from Results
+    生成用于清理并更新的脚本
   </h2>
   <p>
-    This script will delete all the original files of the available mods, move
-    all unavailable mods to an "outdated" folder and download all updated
-    mods.<br /><br />
-    To execute this script you need to have either PowerShell (Windows) or Bash
-    (Mac & Linux) installed on your system.<br />
-    Copy the generated script below and run it in your terminal in the mods
-    folder, by right-clicking in the folder and selecting "Open in Terminal" or
-    similar.
+    这个脚本会删除所有可用模组的原始文件，把所有不可用的模组移到 "outdated" 文件夹，
+    并下载所有更新的模组到文件夹中<br /><br />
+    要执行这个脚本，你的系统上需要安装 PowerShell（Windows）或 Bash（Mac 和 Linux）<br />
+    然后复制下面生成的脚本，在 mods 文件夹中右键点击选择 在终端中打开 或类似选项，
+    即可在弹出的命令行中粘贴并运行它
   </p>
   <!-- Script Language Selection -->
   <div class="mt-2 flex flex-col items-center justify-center gap-y-1">
     <label class="block text-lg font-medium dark:text-slate-100"
-      >Scripting Language</label
+      >脚本语言</label
     >
     <div class="mt-2 flex gap-x-3">
       <div class="flex items-center gap-x-1">
@@ -69,7 +66,7 @@
   <!-- Script Preview -->
   <div class="mt-6">
     <label class="block text-lg font-medium text-gray-700 dark:text-slate-100"
-      >Generated Script</label
+      >脚本预览</label
     >
     <markdown
       class="block"
@@ -84,11 +81,11 @@
         class="group flex items-center gap-x-2 rounded-md bg-white p-2 text-gray-800 ring-1 ring-inset ring-gray-300 hover:ring-gray-200 focus:outline-none focus:ring-gray-400 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-500 dark:hover:ring-slate-200"
       >
         <span class="relative font-medium">
-          <span class="group-active:invisible"> Copy Script </span>
+          <span class="group-active:invisible"> 复制脚本 </span>
           <span
             class="absolute left-0 top-0 hidden w-full text-center group-active:inline-block"
           >
-            Copied!
+            已复制!
           </span>
         </span>
 
@@ -124,7 +121,7 @@
       type="button"
       class="flex items-center rounded-md bg-white px-3 py-1.5 font-semibold text-gray-800 ring-1 ring-inset ring-gray-300 transition-shadow hover:ring-gray-400 focus:outline-none focus:ring-gray-400 active:ring-gray-500 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-500 dark:hover:ring-slate-200"
     >
-      Close
+      关闭
     </button>
   </div>
 </div>

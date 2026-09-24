@@ -11,17 +11,17 @@
       <section class="space-y-4">
         <div class="flex items-center justify-between space-x-3">
           <p class="text-lg font-bold dark:text-slate-100">
-            Mods which have releases for the selected version
+            适用于所选版本的模组
           </p>
           <div class="flex items-center space-x-2">
             <!-- Search Input -->
             <div class="relative">
               <input
                 type="text"
-                placeholder="Search results..."
+                placeholder="搜索结果..."
                 class="h-10 w-48 rounded-md pl-10 pr-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-gray-400 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-500 dark:hover:ring-slate-200"
                 [(ngModel)]="searchTerm"
-                aria-label="Search results"
+                aria-label="搜索结果"
               />
               <svg
                 class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
@@ -100,7 +100,7 @@
         }
         @if (dependencyMods.length > 0) {
           <p class="pt-4 text-lg font-bold dark:text-slate-100">
-            Required Dependencies
+            所需的依赖模组
           </p>
           <app-mod-list
             [mods]="dependencyMods"
@@ -131,7 +131,7 @@
               (click)="downloadUpdated()"
               class="flex items-center gap-x-2 rounded-lg bg-white py-1 px-2 hover:underline dark:bg-slate-800 dark:text-slate-200"
             >
-              Download Updated
+              仅下载所需
             </button>
           </span>
           <span class="flex items-center">
@@ -154,7 +154,7 @@
               (click)="showScriptGenerator = true"
               class="flex items-center gap-x-2 rounded-lg bg-white py-1 px-2 hover:underline dark:bg-slate-800 dark:text-slate-200"
             >
-              Generate Script
+              生成脚本
             </button>
           </span>
           <span class="flex items-center">
@@ -162,7 +162,7 @@
               (click)="downloadAll()"
               class="flex items-center gap-x-2 rounded-lg bg-white py-1 px-2 hover:underline dark:bg-slate-800 dark:text-slate-200"
             >
-              Download All
+              下载所有
             </button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -185,21 +185,21 @@
     }
     @if (unavailableMods.length > 0) {
       <app-mod-info-section
-        [title]="'Mods which have no releases for the selected version'"
+        [title]="'未适配所选版本的模组'"
         [mods]="unavailableMods"
         [type]="'warning'"
       />
     }
     @if (invalidLoaderMods.length > 0) {
       <app-mod-info-section
-        [title]="'Mods which are not available for the selected mod-loader'"
+        [title]="'未适配所选模组加载器的模组'"
         [mods]="invalidLoaderMods"
         [type]="'warning'"
       />
     }
     @if (unresolvedMods.length > 0) {
       <app-mod-info-section
-        [title]="'Mods that the site was not able to fetch'"
+        [title]="'无法获取到的模组'"
         [mods]="unresolvedMods"
         [type]="'error'"
       />
