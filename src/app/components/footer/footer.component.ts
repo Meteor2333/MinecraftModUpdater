@@ -8,5 +8,6 @@ import { Component } from '@angular/core';
 })
 export class FooterComponent {
   mail: string = 'simon.felix.conrad@proton.me';
+  host: string = 'https://github.com/Meteor2333';
   github: string = 'https://github.com/IsAvaible/AngularModUpdater';
 }
