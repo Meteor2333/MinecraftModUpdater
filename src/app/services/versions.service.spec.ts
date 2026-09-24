@@ -30,7 +30,7 @@ describe('VersionsService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
     // Flush the constructor request
-    const req = httpMock.expectOne('https://launchermeta.mojang.com/mc/game/version_manifest.json');
+    const req = httpMock.expectOne('/api/mojang/mc/game/version_manifest.json');
     req.flush({ latest: { release: '1.20.1', snapshot: '' }, versions: [] });
   });
 
@@ -44,7 +44,7 @@ describe('VersionsService', () => {
     });
 
     // Mock the pending HTTP request to let it complete later
-    const req = httpMock.expectOne('https://launchermeta.mojang.com/mc/game/version_manifest.json');
+    const req = httpMock.expectOne('/api/mojang/mc/game/version_manifest.json');
     req.flush({
       latest: { release: '1.20.1', snapshot: '1.20.2-pre1' },
       versions: []
@@ -73,7 +73,7 @@ describe('VersionsService', () => {
       }
     });
 
-    const req = httpMock.expectOne('https://launchermeta.mojang.com/mc/game/version_manifest.json');
+    const req = httpMock.expectOne('/api/mojang/mc/game/version_manifest.json');
     req.flush(mockResponse);
   });
 
@@ -84,7 +84,7 @@ describe('VersionsService', () => {
     ];
 
     // Flush the constructor request first
-    const req = httpMock.expectOne('https://launchermeta.mojang.com/mc/game/version_manifest.json');
+    const req = httpMock.expectOne('/api/mojang/mc/game/version_manifest.json');
     req.flush({ latest: { release: '1.20.1', snapshot: '' }, versions: [] });
 
     service.setVersions(newVersions);

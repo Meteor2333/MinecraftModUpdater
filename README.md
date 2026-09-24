@@ -1,7 +1,6 @@
 # Minecraft Mod Updater
 
-A Minecraft Java mod updater and migrator using the Modrinth & Curseforge API build with [Angular](https://angular.io/).
-Visit the latest deployment [here](https://mc-mod-updater.vercel.app/).
+A Minecraft Java mod updater and migrator using the Modrinth & Curseforge API built with Angular and a Node.js API proxy.
 
 ## Features
 
@@ -15,17 +14,22 @@ Returns a list of all available version files of your mods and lets you download
 
 ## Usage
 
-There are two ways to use this application:
+### Local development
 
-### 1\. Hosted Version
+Install dependencies and start both the Angular development server and API server:
 
-The easiest way to get started is to use the public version hosted at **[mc-mod-updater.vercel.app](https://mc-mod-updater.vercel.app/)**.
+```bash
+npm ci
+npm start
+```
 
-This version is automatically built and deployed by Vercel directly from the `main` branch of this repository. You can view the [deployment history here](https://github.com/IsAvaible/AngularModUpdater/deployments/Production).
+The frontend is available at `http://localhost:4200` and proxies API requests to the Node server at `http://localhost:3000`. Use `npm run start:api` separately when you only need the API server.
 
-### 2\. Self-Hosting with Docker
+For CurseForge support, set `CURSEFORGE_API_KEY` in the API server environment.
 
-You can also run the application on your own machine using Docker.
+### Self-hosting with Docker
+
+The Docker image runs the Node server, which serves the Angular build and proxies external API and download requests.
 
 **Prerequisites:**
 
@@ -45,20 +49,10 @@ Follow these steps to build the Docker image yourself.
     ```bash
     docker rm minecraft-mod-updater
     docker build -t minecraft-mod-updater .
-    docker run --name minecraft-mod-updater -p 8080:8080 --restart unless-stopped minecraft-mod-updater
+    docker run --name minecraft-mod-updater -p 8080:3000 --restart unless-stopped minecraft-mod-updater
     ```
 
-#### Option B: Use the Pre-built Image
-
-For a faster setup, you can pull and run the pre-built image from the container registry to skip the manual build step.
-
-```bash
-docker rm minecraft-mod-updater
-docker pull ghcr.io/isavaible/angularmodupdater:main
-docker run --name minecraft-mod-updater -p 8080:8080 --restart unless-stopped ghcr.io/isavaible/angularmodupdater:main
-```
-
-After using either method, the application will be accessible at `http://localhost:8080`. The container will be called `minecraft-mod-updater` and will restart automatically unless stopped.
+After building the image, the application will be accessible at `http://localhost:8080`. The container will be called `minecraft-mod-updater` and will restart automatically unless stopped.
 
 ## Contributors
 

@@ -45,7 +45,7 @@ export class VersionsService {
             releaseTime: string;
           }
         ];
-      }>('https://launchermeta.mojang.com/mc/game/version_manifest.json')
+      }>('/api/mojang/mc/game/version_manifest.json')
       .subscribe((data) => {
         // Filter all non-major versions and set the selected version
         this.versions$.next(

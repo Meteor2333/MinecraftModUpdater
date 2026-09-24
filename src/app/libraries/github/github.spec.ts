@@ -67,7 +67,7 @@ describe('GitHubService (GitHub API)', () => {
         done();
       });
 
-      const req = httpMock.expectOne('https://api.github.com/repos/test-owner/test-repo/releases');
+      const req = httpMock.expectOne('/api/github/repos/test-owner/test-repo/releases');
       expect(req.request.method).toBe('GET');
       req.flush(mockReleases as GitHubRelease[]);
     });
@@ -159,7 +159,7 @@ describe('GitHubService (GitHub API)', () => {
         });
 
       // Flushes the GitHub releases fetch
-      const req = httpMock.expectOne('https://api.github.com/repos/sakura-ryoko/litematica/releases');
+      const req = httpMock.expectOne('/api/github/repos/sakura-ryoko/litematica/releases');
       req.flush(mockReleases as GitHubRelease[]);
     });
   });

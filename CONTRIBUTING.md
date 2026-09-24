@@ -70,15 +70,6 @@ To contribute code, follow these steps:
 
 ## Development Notes
 
-### Vercel Functions
-
-If you want to debug Vercel functions (e.g. proxy-file), you can install the Vercel CLI and run the functions locally:
-
-```bash
- npm install -g vercel
- vercel dev
-```
-
 ---
 
 ## Pull Request Guidelines

@@ -4,8 +4,6 @@
 # =========================================
 
 ARG NODE_VERSION=lts-alpine
-ARG NGINX_VERSION=mainline-alpine-perl
-
 FROM node:${NODE_VERSION} AS builder
 
 # Set the working directory inside the container
@@ -22,24 +20,15 @@ COPY . .
 RUN npm run build
 
 
-# =========================================
-# Stage 2: Prepare Nginx to Serve Static Files
-# =========================================
+FROM node:${NODE_VERSION} AS runner
 
-FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runner
+WORKDIR /app
 
-# Use a built-in non-root user for security best practices
-USER nginx
+COPY --from=builder /app/dist/angular-mod-updater/browser ./dist/angular-mod-updater/browser
+COPY server ./server
+COPY --from=builder /app/node_modules ./node_modules
 
-# Copy the build output from the build stage
-COPY --from=builder /app/dist/angular-mod-updater/browser /usr/share/nginx/html
+# Expose the Node server port
+EXPOSE 3000
 
-# Copy the Nginx configuration file
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Expose port 8080
-EXPOSE 8080
-
-# Start Nginx directly with custom config
-ENTRYPOINT ["nginx", "-c", "/etc/nginx/nginx.conf"]
-CMD ["-g", "daemon off;"]
+CMD ["node", "server/index.js"]

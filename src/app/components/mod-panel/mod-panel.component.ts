@@ -27,7 +27,6 @@ import {
   ModrinthVersion,
   ProjectType
 } from '../../libraries/modrinth/types.modrinth';
-import JSZip from 'jszip';
 import { sha1 } from 'js-sha1';
 import { saveAs } from 'file-saver';
 import { Loader, LoaderService } from '../../services/loader.service';
@@ -40,12 +39,12 @@ import { CurseforgeFile } from '../../libraries/curseforge/types.curseforge';
 import { CurseforgeSupportService } from '../../services/curseforgeSupport.service';
 
 export enum SortOption {
-  Default = 'Default Order',
-  NameAsc = 'Name (A-Z)',
-  NameDesc = 'Name (Z-A)',
-  LastUpdated = 'Last Updated',
-  Downloads = 'Downloads',
-  Type = 'Project Type'
+  Default = '默认顺序',
+  NameAsc = '名称（A-Z）',
+  NameDesc = '名称（Z-A）',
+  LastUpdated = '最近更新',
+  Downloads = '下载量',
+  Type = '项目类型'
 }
 
 export interface Mod {
@@ -275,7 +274,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
             annotation: {
               error: {
                 status: 404,
-                message: 'Mod/Hash not found on Modrinth'
+                message: '在 Modrinth 中找不到该模组或文件'
               }
             }
           });
@@ -304,7 +303,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
           annotation: {
             error: {
               status: 404,
-              message: 'Mod/Hash not found on Modrinth or Curseforge'
+              message: '在 Modrinth 或 CurseForge 中找不到该模组或文件'
             }
           }
         });
@@ -316,7 +315,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
         file,
         slug: undefined,
         annotation: {
-          error: { status: 0, message: error.message || 'Unknown error' }
+          error: { status: 0, message: error.message || '未知错误' }
         }
       });
       return false;
@@ -770,8 +769,8 @@ export class ModPanelComponent implements OnInit, OnDestroy {
       await Swal.fire({
         position: 'top-end',
         icon: 'error',
-        title: 'API Deprecated',
-        text: 'The Modrinth API has been deprecated. Please notify the maintainer on GitHub.',
+        title: 'API 已弃用',
+        text: 'Modrinth API 已弃用，请在 GitHub 上联系维护者。',
         showConfirmButton: false,
         timer: 3000,
         backdrop: 'rgba(0, 0, 0, 0.0)'
@@ -801,8 +800,8 @@ export class ModPanelComponent implements OnInit, OnDestroy {
       await Swal.fire({
         position: 'top-end',
         icon: 'error',
-        title: 'API Deprecated',
-        text: 'The Modrinth API has been deprecated. Please notify the maintainer on GitHub.',
+        title: 'API 已弃用',
+        text: 'Modrinth API 已弃用，请在 GitHub 上联系维护者。',
         showConfirmButton: false,
         timer: 3000,
         backdrop: 'rgba(0, 0, 0, 0.0)'
@@ -894,7 +893,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     const totalProcessCount = this.toProcess.length + modHashes.length;
     if (totalProcessCount > 290) {
       const excluded = totalProcessCount - 290;
-      const message = `${excluded} file${excluded > 1 ? 's' : ''} will not be processed to prevent rate limiting`;
+      const message = `为避免触发速率限制，将有 ${excluded} 个文件不会被处理`;
       console.log(message);
       Swal.fire({
         position: 'top-end',
@@ -1229,7 +1228,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
       Swal.fire({
         position: 'top-end',
         icon: 'info',
-        title: 'No updated mods',
+        title: '没有可更新的模组',
         showConfirmButton: false,
         timer: 2500,
         backdrop: `rgba(0, 0, 0, 0.0)`,
@@ -1256,112 +1255,53 @@ export class ModPanelComponent implements OnInit, OnDestroy {
    * If there are more than 3 files, it will create a zip file with all the mods
    */
   async downloadMultiple(files: { filename: string; url: string }[]) {
-    if (files.length <= 3) {
-      for (let file of files) window.open(file.url);
-    } else {
-      const failedFiles: typeof files = [];
-      Swal.fire({
-        title: '下载中...',
-        html: '进度: <b>0%</b>',
-        allowOutsideClick: false,
-        showCancelButton: false,
-        showConfirmButton: false,
-        ...this.getSwalTheme(),
-        didOpen: async () => {
-          Swal.showLoading();
-
-          const zip = new JSZip();
-          let completed = 0;
-          let total = files.length;
-
-          let promises = files.map((file) =>
-            fetch(file.url, { redirect: 'follow' })
-              .then(async (r) => {
-                if (!r.ok) {
-                  throw new Error();
-                }
-                zip.file(file.filename, await r.blob());
-                completed++;
-                Swal.update({
-                  html: `进度: <b>${Math.round((completed / total) * 100)}%</b>`
-                });
-                Swal.showLoading();
-              })
-              .catch(async () => {
-                console.error(
-                  `Error downloading file ${file.filename}. Retrying with Vercel function.`
-                );
-                try {
-                  // The Vercel function workaround is currently disabled. It was triggering quota limits, which risks
-                  // a full deployment pause which is VERY bad.
-                  throw new Error();
-
-                  const response = await fetch(
-                    `/api/proxy-file?url=${encodeURIComponent(file.url)}`
-                  );
-                  completed++;
-                  Swal.update({
-                    html: `进度: <b>${Math.round((completed / total) * 100)}%</b>`
-                  });
-                  if (!response.ok) {
-                    throw new Error();
-                  }
-                  zip.file(file.filename, await response.blob());
-                } catch {
-                  console.error(
-                    `Error downloading file ${file.filename} with Vercel function.`
-                  );
-                  failedFiles.push(file);
-                }
-              })
-          );
-
-          await Promise.all(promises);
-
-          Swal.update({ title: '创建压缩包中', html: '请等待...' });
-          Swal.showLoading();
-
-          const zipBlob = await zip.generateAsync({ type: 'blob' });
-          saveAs(zipBlob, 'mods.zip');
+    const dialog = Swal.fire({
+      title: '下载并打包中...',
+      allowOutsideClick: false,
+      showCancelButton: false,
+      showConfirmButton: false,
+      ...this.getSwalTheme(),
+      didOpen: async () => {
+        Swal.showLoading();
+        try {
+          const response = await fetch('/api/download/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ files })
+          });
+          if (!response.ok) {
+            throw new Error('服务器打包下载失败');
+          }
+          saveAs(await response.blob(), 'minecraft-mods.zip');
+          const failureCount = Number(response.headers.get('X-Download-Failures') || 0);
           Swal.close();
-
-          if (failedFiles.length > 0) {
-            const failedListHTML = failedFiles
-              .map(
-                (f) =>
-                  `<li><a href="${f.url}" target="_blank">${f.filename}</a></li>`
-              )
-              .join('');
-
+          if (failureCount > 0) {
             await Swal.fire({
               position: 'top-end',
               icon: 'warning',
-              title: `Some Downloads Failed`,
-              html: `
-              <p class="mb-3">
-                <b>${failedFiles.length}</b> file${failedFiles.length > 1 ? 's' : ''} could not be downloaded.
-              </p>
-              <p>This may be due to CORS or server issues. Click "Retry" to attempt a manual download in a new tab.</p>
-              <p class="mt-2">Affected files:</p>
-              <ul class="list-inside list-disc max-h-36 overflow-y-auto">
-                ${failedListHTML}
-              </ul>
-            `,
-              backdrop: `rgba(0, 0, 0, 0.0)`,
-              confirmButtonText: 'Retry with Workaround',
-              allowOutsideClick: false,
-              ...this.getSwalTheme(),
-              preConfirm: () => {
-                for (let file of failedFiles) {
-                  window.open(file.url);
-                }
-              },
-              showCancelButton: true
+              title: '部分文件下载失败',
+              text: `有 ${failureCount} 个文件下载失败，失败列表已放入压缩包。`,
+              showConfirmButton: true,
+              confirmButtonText: '知道了',
+              ...this.getSwalTheme()
             });
           }
+        } catch (error) {
+          console.error('Archive download failed:', error);
+          Swal.close();
+          await Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: '下载失败',
+            text: '服务器无法完成打包下载，请稍后重试。',
+            showConfirmButton: true,
+            confirmButtonText: '知道了',
+            ...this.getSwalTheme()
+          });
         }
-      });
-    }
+      }
+    });
+    await dialog;
   }
 
   /**

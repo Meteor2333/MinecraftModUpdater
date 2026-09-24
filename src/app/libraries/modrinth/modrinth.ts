@@ -37,7 +37,7 @@ export class Modrinth extends BaseApiProvider {
   protected apiName = 'Modrinth';
   private static _instance: Modrinth;
 
-  protected readonly modrinthAPIUrl = 'https://api.modrinth.com/v2'; // Modrinth API Endpoint
+  protected readonly modrinthAPIUrl = '/api/modrinth/v2';
   protected readonly headers = {
     // Headers for the requests
     'Content-Type': 'application/json',

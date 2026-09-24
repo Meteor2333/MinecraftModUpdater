@@ -32,13 +32,10 @@ export class Curseforge extends BaseApiProvider {
   protected apiName = 'Curseforge';
   private static _instance: Curseforge;
 
-  public curseforgeAPIUrl = 'https://api.curseforge.com/v1/';
+  public curseforgeAPIUrl = '/api/curseforge/v1/';
   public headers = {
     'Content-Type': 'application/json',
-    Accept: 'application/json',
-    'x-api-key': window.atob(
-      'JDJhJDEwJEN0ZmFPQTRIT1phbXZTMXphVHUwLnVoTS51VzlNNzBQOGRyZnF2WUptOFNXdy5yWTlPSk1t'
-    )
+    Accept: 'application/json'
   };
 
   public static get Instance() {

@@ -23,7 +23,7 @@ import { RateLimitInfo } from '../RateLimitedApi';
 
 export class GitHub extends BaseApiProvider {
   protected override apiName = 'GitHub';
-  public githubAPIUrl = 'https://api.github.com';
+  public githubAPIUrl = '/api/github';
   public headers = {
     Accept: 'application/vnd.github.v3+json',
     'Content-Type': 'application/json'

@@ -40,10 +40,11 @@ export class ModCardComponent {
   }
 
   get fileUrl() {
-    return (
+    const url = (
       this.selectedVersion.files.find((f) => f.primary) ||
       this.selectedVersion.files[0]
     ).url;
+    return `/api/download?url=${encodeURIComponent(url)}`;
   }
 
   get isGitHubMod() {
@@ -58,8 +59,21 @@ export class ModCardComponent {
 
   get authorLinkTitle() {
     return this.isGitHubMod
-      ? "Open the Author's GitHub Profile"
-      : "Open the Author's Modrinth Page";
+      ? '打开作者的 GitHub 主页'
+      : '打开作者的 Modrinth 页面';
+  }
+
+  get versionTypeLabel() {
+    switch (this.selectedVersion.version_type) {
+      case 'release':
+        return '正式版';
+      case 'beta':
+        return '测试版';
+      case 'alpha':
+        return '预览版';
+      default:
+        return this.selectedVersion.version_type;
+    }
   }
 
   toggleChangelog() {
