@@ -13,5 +13,4 @@ export class ModListComponent {
   @Input() view: View = View.List;
   @Input() order: string[] = [];
 
-  View = View;
 }

@@ -10,9 +10,12 @@ import {
   bufferTime,
   catchError,
   defaultIfEmpty,
+  defer,
   filter,
   firstValueFrom,
   forkJoin,
+  from,
+  finalize,
   map, mergeMap,
   Observable,
   of,
@@ -20,6 +23,7 @@ import {
   Subject,
   switchMap,
   take,
+  timer,
   timeout
 } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -45,6 +49,9 @@ export class Modrinth extends BaseApiProvider {
   }
 
   private http = inject(HttpClient);
+  private readonly requestIntervalMs = 220;
+  private requestQueue: Promise<void> = Promise.resolve();
+  private lastRequestStartedAt = 0;
 
   protected override get _rateLimitInfo(): RateLimitInfo {
     return {
@@ -80,6 +87,30 @@ export class Modrinth extends BaseApiProvider {
   constructor() {
     super();
     this.setupBuffering();
+  }
+
+  /** Serializes Modrinth requests and keeps them below the public API limit. */
+  private scheduleRequest<T>(request: () => Observable<T>): Observable<T> {
+    return defer(() => {
+      const previousRequest = this.requestQueue;
+      let releaseRequest!: () => void;
+      this.requestQueue = new Promise<void>((resolve) => {
+        releaseRequest = resolve;
+      });
+
+      return from(previousRequest).pipe(
+        mergeMap(() => {
+          const elapsed = Date.now() - this.lastRequestStartedAt;
+          const waitMs = Math.max(0, this.requestIntervalMs - elapsed);
+          return timer(waitMs);
+        }),
+        mergeMap(() => {
+          this.lastRequestStartedAt = Date.now();
+          return request();
+        }),
+        finalize(() => releaseRequest())
+      );
+    });
   }
 
   /**
@@ -134,8 +165,9 @@ export class Modrinth extends BaseApiProvider {
   ): Observable<{ [hash: string]: ModrinthProject | AnnotatedError }> {
     let url = `${this.modrinthAPIUrl}/projects`;
     const params = new HttpParams().set('ids', JSON.stringify(ids));
-    return this.http
-      .get<ModrinthProject[]>(url, { headers: this.headers, params, observe: 'response' })
+    return this.scheduleRequest(() =>
+      this.http
+        .get<ModrinthProject[]>(url, { headers: this.headers, params, observe: 'response' })
       .pipe(
         timeout(10000),
         this.createRetryStrategy(3, 1000),
@@ -176,7 +208,8 @@ export class Modrinth extends BaseApiProvider {
           ids.forEach((id) => (result[id] = errObj));
           return of(result);
         })
-      );
+        )
+    );
   }
 
   /**
@@ -215,8 +248,9 @@ export class Modrinth extends BaseApiProvider {
       );
     }
 
-    return this.http
-      .get<
+    return this.scheduleRequest(() =>
+      this.http
+        .get<
         ModrinthVersion[]
       >(url, { headers: this.headers, params, observe: 'response' })
       .pipe(
@@ -230,7 +264,8 @@ export class Modrinth extends BaseApiProvider {
         catchError(
           this.createErrorHandler<ModrinthVersion[] | AnnotatedError>()
         )
-      );
+        )
+    );
   }
 
   /**
@@ -262,8 +297,9 @@ export class Modrinth extends BaseApiProvider {
     hashes: string[]
   ): Observable<{ [hash: string]: ModrinthVersion | AnnotatedError }> {
     const url = `${this.modrinthAPIUrl}/version_files`;
-    return this.http
-      .post<{ [hash: string]: ModrinthVersion | AnnotatedError }>(
+    return this.scheduleRequest(() =>
+      this.http
+        .post<{ [hash: string]: ModrinthVersion | AnnotatedError }>(
         url,
         {
           hashes: hashes,
@@ -271,7 +307,7 @@ export class Modrinth extends BaseApiProvider {
         },
         { headers: this.headers, observe: 'response' }
       )
-      .pipe(
+        .pipe(
         timeout(10000),
         this.createRetryStrategy(3, 1000),
         map((resp) => {
@@ -301,7 +337,8 @@ export class Modrinth extends BaseApiProvider {
           hashes.forEach((hash) => (result[hash] = errObj));
           return of(result);
         })
-      );
+        )
+    );
   }
 
   /**
@@ -367,8 +404,9 @@ export class Modrinth extends BaseApiProvider {
     }
 
     // Make the HTTP GET request with the constructed parameters
-    return this.http
-      .get<SearchResult>(`${this.modrinthAPIUrl}/search`, {
+    return this.scheduleRequest(() =>
+      this.http
+        .get<SearchResult>(`${this.modrinthAPIUrl}/search`, {
         params: httpParams
       })
       .pipe(
@@ -378,7 +416,8 @@ export class Modrinth extends BaseApiProvider {
           // Wrap the error in an AnnotatedError and return it
           return of({ error } as AnnotatedError);
         })
-      );
+        )
+    );
   }
 
   public async parseMrpack(

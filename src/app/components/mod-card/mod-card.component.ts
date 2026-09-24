@@ -71,6 +71,5 @@ export class ModCardComponent {
 }
 
 export enum View {
-  Grid,
   List
 }

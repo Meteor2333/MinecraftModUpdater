@@ -13,5 +13,4 @@ export class ProjectTypeLabelComponent {
   @Input() view!: View;
 
   ProjectType = ProjectType;
-  protected readonly View = View;
 }

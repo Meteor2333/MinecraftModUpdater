@@ -13,5 +13,4 @@ export class ModStatusLabelComponent {
   @Input() view!: View;
 
   VersionStatus = VersionStatus;
-  protected readonly View = View;
 }

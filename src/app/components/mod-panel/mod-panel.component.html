@@ -40,61 +40,11 @@
               </svg>
             </div>
 
-            <button
-              class="flex aspect-square h-10 items-center justify-center rounded-md bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:ring-gray-400 focus:outline-none focus:ring-gray-400 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-500 dark:hover:ring-slate-200"
-              (click)="
-                availableModsView =
-                  availableModsView == View.List ? View.Grid : View.List
-              "
-              [attr.aria-label]="
-                availableModsView === View.List
-                  ? 'Switch to grid view'
-                  : 'Switch to list view'
-              "
-            >
-              @switch (availableModsView) {
-                @case (View.List) {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="h-6 w-6"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                    />
-                  </svg>
-                }
-                @case (View.Grid) {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="h-6 w-6"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M14 20.4v-5.8a.6.6 0 01.6-.6h5.8a.6.6 0 01.6.6v5.8a.6.6 0 01-.6.6h-5.8a.6.6 0 01-.6-.6zM3 20.4v-5.8a.6.6 0 01.6-.6h5.8a.6.6 0 01.6.6v5.8a.6.6 0 01-.6.6H3.6a.6.6 0 01-.6-.6zM14 9.4V3.6a.6.6 0 01.6-.6h5.8a.6.6 0 01.6.6v5.8a.6.6 0 01-.6.6h-5.8a.6.6 0 01-.6-.6zM3 9.4V3.6a.6.6 0 01.6-.6h5.8a.6.6 0 01.6.6v5.8a.6.6 0 01-.6.6H3.6a.6.6 0 01-.6-.6z"
-                    />
-                  </svg>
-                }
-              }
-            </button>
           </div>
         </div>
         @if (primaryMods.length > 0) {
           <app-mod-list
             [mods]="primaryMods"
-            [view]="availableModsView"
             [order]="order"
           />
         }
@@ -104,7 +54,6 @@
           </p>
           <app-mod-list
             [mods]="dependencyMods"
-            [view]="availableModsView"
             [order]="order"
           />
         }
@@ -158,12 +107,6 @@
             </button>
           </span>
           <span class="flex items-center">
-            <button
-              (click)="downloadAll()"
-              class="flex items-center gap-x-2 rounded-lg bg-white py-1 px-2 hover:underline dark:bg-slate-800 dark:text-slate-200"
-            >
-              下载所有
-            </button>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -179,6 +122,12 @@
                 d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75"
               />
             </svg>
+            <button
+              (click)="downloadAll()"
+              class="flex items-center gap-x-2 rounded-lg bg-white py-1 px-2 hover:underline dark:bg-slate-800 dark:text-slate-200"
+            >
+              下载所有
+            </button>
           </span>
         </div>
       </section>

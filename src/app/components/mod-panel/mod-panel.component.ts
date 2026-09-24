@@ -27,7 +27,6 @@ import {
   ModrinthVersion,
   ProjectType
 } from '../../libraries/modrinth/types.modrinth';
-import { View } from '../mod-card/mod-card.component';
 import JSZip from 'jszip';
 import { sha1 } from 'js-sha1';
 import { saveAs } from 'file-saver';
@@ -93,7 +92,6 @@ export class ModPanelComponent implements OnInit, OnDestroy {
   mcVersions: MinecraftVersion[] = [];
   loader!: Loader;
   curseforgeSupport: boolean = false;
-  availableModsView: View = window.innerWidth < 1200 ? View.Grid : View.List;
   showScriptGenerator: boolean = false;
   filesSubscription!: Subscription;
   versionsSubscription!: Subscription;
@@ -172,6 +170,8 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     // thy fates shall be intertwined
     this.filesSubscription = this.filesService.files.subscribe((files) => {
       this.files = files;
+      this.processedFilesNames = [];
+      this.toProcess = [];
     });
     this.versionsSubscription = this.versionsService.versions.subscribe(
       (versions) => {
@@ -210,41 +210,6 @@ export class ModPanelComponent implements OnInit, OnDestroy {
       1
     );
     this.toProcess.splice(this.toProcess.indexOf(file), 1);
-  }
-
-  /**
-   * Removes files that have already been processed from the files list
-   */
-  filterProcessed() {
-    const prevLen = this.files.length;
-    // Remove already processed files. This is done to prevent duplicates
-    this.files = this.files.filter(
-      (file) => this.processedFilesNames.indexOf(file.name) == -1
-    ); // Remove already processed files
-    // Remove files that will be reprocessed from the unresolved mods list
-    this.unresolvedMods = this.unresolvedMods.filter(
-      (um) => this.files.map((file) => file.name).indexOf(um.file.name) == -1
-    );
-    // Propagate the changes to the files service
-    this.filesService.setFiles(this.files);
-
-    if (prevLen != this.files.length) {
-      // If there were duplicates
-      const skipped = prevLen - this.files.length;
-      const message =
-        `Skipping ${skipped} file` +
-        (skipped > 1 ? 's that were' : ' that was') +
-        ' already processed';
-      console.log(message);
-      Swal.fire({
-        position: 'top-end',
-        icon: 'warning',
-        title: message,
-        showConfirmButton: false,
-        timer: 3000,
-        backdrop: `rgba(0, 0, 0, 0.0)`
-      });
-    }
   }
 
   /**
@@ -856,7 +821,6 @@ export class ModPanelComponent implements OnInit, OnDestroy {
   async updateMods(): Promise<
     [boolean, Observable<boolean>, Observable<number>]
   > {
-    this.filterProcessed(); // Remove already processed files
     let mcVersion: MinecraftVersion = this.mcVersions.find((v) => v.selected)!; // Get the selected version
 
     // Process JSON files first to extract modpack information
@@ -1039,6 +1003,21 @@ export class ModPanelComponent implements OnInit, OnDestroy {
    * Orchestrates the entire update process, including file processing and dependency fetching.
    */
   async startUpdateMods() {
+    if (this.files.length === 0) {
+      await Swal.fire({
+        position: 'top-end',
+        icon: 'info',
+        title: '请先上传文件',
+        text: '请先选择或拖入模组文件，再点击上传按钮开始处理。',
+        showConfirmButton: false,
+        timer: 3000,
+        backdrop: false,
+        ...this.getSwalTheme()
+      });
+      return;
+    }
+
+    this.resetLists();
     this.loading = true;
     this.loadingPercent = 0;
 
@@ -1253,11 +1232,23 @@ export class ModPanelComponent implements OnInit, OnDestroy {
         title: 'No updated mods',
         showConfirmButton: false,
         timer: 2500,
-        backdrop: `rgba(0, 0, 0, 0.0)`
+        backdrop: `rgba(0, 0, 0, 0.0)`,
+        ...this.getSwalTheme()
       });
       return;
     }
     this.downloadMultiple(files);
+  }
+
+  private getSwalTheme() {
+    const darkMode =
+      document.documentElement.classList.contains('dark') ||
+      document.body.classList.contains('dark') ||
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    return darkMode
+      ? { background: '#1e293b', color: '#e2e8f0' }
+      : { background: '#ffffff', color: '#1f2937' };
   }
 
   /**
@@ -1270,11 +1261,12 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     } else {
       const failedFiles: typeof files = [];
       Swal.fire({
-        title: 'Downloading...',
-        html: 'Progress: <b>0%</b>',
+        title: '下载中...',
+        html: '进度: <b>0%</b>',
         allowOutsideClick: false,
         showCancelButton: false,
         showConfirmButton: false,
+        ...this.getSwalTheme(),
         didOpen: async () => {
           Swal.showLoading();
 
@@ -1291,7 +1283,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
                 zip.file(file.filename, await r.blob());
                 completed++;
                 Swal.update({
-                  html: `Progress: <b>${Math.round((completed / total) * 100)}%</b>`
+                  html: `进度: <b>${Math.round((completed / total) * 100)}%</b>`
                 });
                 Swal.showLoading();
               })
@@ -1309,7 +1301,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
                   );
                   completed++;
                   Swal.update({
-                    html: `Progress: <b>${Math.round((completed / total) * 100)}%</b>`
+                    html: `进度: <b>${Math.round((completed / total) * 100)}%</b>`
                   });
                   if (!response.ok) {
                     throw new Error();
@@ -1326,7 +1318,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
 
           await Promise.all(promises);
 
-          Swal.update({ title: 'Creating ZIP...', html: 'Please wait...' });
+          Swal.update({ title: '创建压缩包中', html: '请等待...' });
           Swal.showLoading();
 
           const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -1358,6 +1350,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
               backdrop: `rgba(0, 0, 0, 0.0)`,
               confirmButtonText: 'Retry with Workaround',
               allowOutsideClick: false,
+              ...this.getSwalTheme(),
               preConfirm: () => {
                 for (let file of failedFiles) {
                   window.open(file.url);
@@ -1380,7 +1373,6 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     }
   }
 
-  View = View; // Expose the View enum to the template
 }
 
 export interface ExtendedVersion extends ModrinthVersion {

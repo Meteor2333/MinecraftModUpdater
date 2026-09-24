@@ -23,4 +23,14 @@ describe('FileDropzoneComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('replaces previously selected files when new files are selected', () => {
+    const previousFile = new File(['previous'], 'previous.jar');
+    const nextFile = new File(['next'], 'next.jar');
+
+    component.onSelect({ addedFiles: [previousFile] });
+    component.onSelect({ addedFiles: [nextFile] });
+
+    expect(component.files).toEqual([nextFile]);
+  });
 });

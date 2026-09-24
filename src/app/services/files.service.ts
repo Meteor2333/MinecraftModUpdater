@@ -12,4 +12,8 @@ export class FilesService {
   setFiles(files: File[]) {
     this.files$.next(files);
   }
+
+  replaceFiles(files: File[]) {
+    this.files$.next(files);
+  }
 }
