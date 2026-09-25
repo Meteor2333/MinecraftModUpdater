@@ -12,6 +12,13 @@ export abstract class RateLimitedApi {
     return null; // Override this in subclasses to provide client-side rate limit info
   }
 
+  /** Seed the display with a known client-side estimate before the first response. */
+  protected initializeClientSideRateLimit(): void {
+    if (this._rateLimitInfo === null || this._rateLimit !== null) return;
+    this._rateLimit = { ...this._rateLimitInfo };
+    this._isClientSideRateLimit = true;
+  }
+
   private _rateLimitTimer: NodeJS.Timeout | null = null;
   private _isClientSideRateLimit: boolean = false;
 

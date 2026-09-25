@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting
+} from '@angular/common/http/testing';
 import { VersionsService, MinecraftVersion } from './versions.service';
 
 describe('VersionsService', () => {
@@ -36,7 +39,7 @@ describe('VersionsService', () => {
 
   it('should initially set default/loading versions', (done) => {
     service.versions.subscribe((versions) => {
-      if (versions.length > 0 && versions[1]?.version === 'Loading...') {
+      if (versions.length > 0 && versions[1]?.version === '加载中...') {
         expect(versions[0].version).toBe('1.20.1');
         expect(versions[0].selected).toBeTrue();
         done();
@@ -67,8 +70,12 @@ describe('VersionsService', () => {
       emissionCount++;
       if (emissionCount === 2) {
         expect(versions.length).toBe(3);
-        expect(versions.find(v => v.version === '1.20.1')?.selected).toBeTrue();
-        expect(versions.find(v => v.version === '1.20')?.selected).toBeFalse();
+        expect(
+          versions.find((v) => v.version === '1.20.1')?.selected
+        ).toBeTrue();
+        expect(
+          versions.find((v) => v.version === '1.20')?.selected
+        ).toBeFalse();
         done();
       }
     });
@@ -92,7 +99,7 @@ describe('VersionsService', () => {
     expect(localStorage.getItem('mc-version')).toBe(JSON.stringify('1.20.2'));
 
     service.versions.subscribe((versions) => {
-      expect(versions.find(v => v.version === '1.20.2')?.selected).toBeTrue();
+      expect(versions.find((v) => v.version === '1.20.2')?.selected).toBeTrue();
       done();
     });
   });

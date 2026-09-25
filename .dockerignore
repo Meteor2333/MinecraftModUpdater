@@ -5,7 +5,6 @@
 # Node and build output
 # ================================
 node_modules
-dist
 out-tsc
 .angular
 .cache

@@ -4,7 +4,13 @@ import {
   ExtendedVersion,
   VersionStatus
 } from '../mod-panel/mod-panel.component';
-import { animate, style, transition, trigger } from '@angular/animations';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger
+} from '@angular/animations';
 
 @Component({
   selector: 'app-mod-card',
@@ -12,13 +18,10 @@ import { animate, style, transition, trigger } from '@angular/animations';
   styleUrls: ['./mod-card.component.css'],
   animations: [
     trigger('slideInOut', [
-      transition(':enter', [
-        style({ height: 0 }),
-        animate('150ms ease-out', style({ height: '*' }))
-      ]),
-      transition(':leave', [
-        animate('150ms ease-in', style({ height: 0, opacity: 0 }))
-      ])
+      state('closed', style({ height: 0, opacity: 0 })),
+      state('open', style({ height: '*', opacity: 1 })),
+      transition('closed => open', animate('150ms ease-out')),
+      transition('open => closed', animate('150ms ease-in'))
     ])
   ],
   standalone: false
@@ -29,6 +32,11 @@ export class ModCardComponent {
   @Input() view!: View;
 
   showChangelog = false;
+  changelogReady = false;
+
+  onChangelogReady() {
+    this.changelogReady = true;
+  }
 
   get selectedVersion(): ExtendedVersion {
     return this.versions.find((v) => v.selected)!;

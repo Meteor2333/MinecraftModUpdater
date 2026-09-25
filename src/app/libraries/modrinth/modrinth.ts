@@ -16,7 +16,8 @@ import {
   forkJoin,
   from,
   finalize,
-  map, mergeMap,
+  map,
+  mergeMap,
   Observable,
   of,
   share,
@@ -86,6 +87,7 @@ export class Modrinth extends BaseApiProvider {
 
   constructor() {
     super();
+    this.initializeClientSideRateLimit();
     this.setupBuffering();
   }
 
@@ -152,9 +154,9 @@ export class Modrinth extends BaseApiProvider {
       for (let i = 0; i < uniqueIds.length; i += 100) {
         chunks.push(uniqueIds.slice(i, i + 100));
       }
-      return forkJoin(chunks.map((chunk) => this.fetchProjectsChunk(chunk))).pipe(
-        map((results: any[]) => Object.assign({}, ...results))
-      );
+      return forkJoin(
+        chunks.map((chunk) => this.fetchProjectsChunk(chunk))
+      ).pipe(map((results: any[]) => Object.assign({}, ...results)));
     }
 
     return this.fetchProjectsChunk(uniqueIds);
@@ -167,47 +169,52 @@ export class Modrinth extends BaseApiProvider {
     const params = new HttpParams().set('ids', JSON.stringify(ids));
     return this.scheduleRequest(() =>
       this.http
-        .get<ModrinthProject[]>(url, { headers: this.headers, params, observe: 'response' })
-      .pipe(
-        timeout(10000),
-        this.createRetryStrategy(3, 1000),
-        map((resp) => {
-          this.trackRateLimit(resp.headers);
-          let projects = resp.body!;
-          let result: { [hash: string]: ModrinthProject | AnnotatedError } = {};
-
-          projects.forEach((project) => {
-            const parsed = this.parseProject(project);
-            if (!this.isAnnotatedError(parsed)) {
-              parsed.project_url = `https://modrinth.com/project/${project.id}`;
-            }
-            result[project.id] = parsed;
-            if (project.slug) {
-              result[project.slug] = parsed;
-            }
-          });
-
-          ids.forEach((id) => {
-            if (result[id] === undefined) {
-              result[id] = {
-                error: {
-                  message: `Project not found for id or slug: ${id}`,
-                  status: 404
-                }
-              } as AnnotatedError;
-            }
-          });
-
-          return result;
-        }),
-        catchError((error) => {
-          const status = error?.status || 500;
-          const message = error?.message || 'Error fetching projects';
-          const errObj: AnnotatedError = { error: { message, status } };
-          const result: { [hash: string]: AnnotatedError } = {};
-          ids.forEach((id) => (result[id] = errObj));
-          return of(result);
+        .get<ModrinthProject[]>(url, {
+          headers: this.headers,
+          params,
+          observe: 'response'
         })
+        .pipe(
+          timeout(10000),
+          this.createRetryStrategy(3, 1000),
+          map((resp) => {
+            this.trackRateLimit(resp.headers);
+            let projects = resp.body!;
+            let result: { [hash: string]: ModrinthProject | AnnotatedError } =
+              {};
+
+            projects.forEach((project) => {
+              const parsed = this.parseProject(project);
+              if (!this.isAnnotatedError(parsed)) {
+                parsed.project_url = `https://modrinth.com/project/${project.id}`;
+              }
+              result[project.id] = parsed;
+              if (project.slug) {
+                result[project.slug] = parsed;
+              }
+            });
+
+            ids.forEach((id) => {
+              if (result[id] === undefined) {
+                result[id] = {
+                  error: {
+                    message: `Project not found for id or slug: ${id}`,
+                    status: 404
+                  }
+                } as AnnotatedError;
+              }
+            });
+
+            return result;
+          }),
+          catchError((error) => {
+            const status = error?.status || 500;
+            const message = error?.message || 'Error fetching projects';
+            const errObj: AnnotatedError = { error: { message, status } };
+            const result: { [hash: string]: AnnotatedError } = {};
+            ids.forEach((id) => (result[id] = errObj));
+            return of(result);
+          })
         )
     );
   }
@@ -238,8 +245,10 @@ export class Modrinth extends BaseApiProvider {
     loaders: string[]
   ): Observable<ModrinthVersion[] | AnnotatedError> {
     const url = `${this.modrinthAPIUrl}/project/${id}/version`;
-    let params = new HttpParams()
-      .set('game_versions', JSON.stringify([version]));
+    let params = new HttpParams().set(
+      'game_versions',
+      JSON.stringify([version])
+    );
 
     if (loaders && loaders.length > 0) {
       params = params.set(
@@ -250,20 +259,22 @@ export class Modrinth extends BaseApiProvider {
 
     return this.scheduleRequest(() =>
       this.http
-        .get<
-        ModrinthVersion[]
-      >(url, { headers: this.headers, params, observe: 'response' })
-      .pipe(
-        timeout(10000),
-        this.createRetryStrategy(3, 1000),
-        map((resp) => {
-          this.trackRateLimit(resp.headers);
-          // Process the response body
-          return this.parseVersions(resp.body!);
-        }),
-        catchError(
-          this.createErrorHandler<ModrinthVersion[] | AnnotatedError>()
-        )
+        .get<ModrinthVersion[]>(url, {
+          headers: this.headers,
+          params,
+          observe: 'response'
+        })
+        .pipe(
+          timeout(10000),
+          this.createRetryStrategy(3, 1000),
+          map((resp) => {
+            this.trackRateLimit(resp.headers);
+            // Process the response body
+            return this.parseVersions(resp.body!);
+          }),
+          catchError(
+            this.createErrorHandler<ModrinthVersion[] | AnnotatedError>()
+          )
         )
     );
   }
@@ -285,9 +296,9 @@ export class Modrinth extends BaseApiProvider {
       for (let i = 0; i < uniqueHashes.length; i += 100) {
         chunks.push(uniqueHashes.slice(i, i + 100));
       }
-      return forkJoin(chunks.map((chunk) => this.fetchVersionsFromHashesChunk(chunk))).pipe(
-        map((results: any[]) => Object.assign({}, ...results))
-      );
+      return forkJoin(
+        chunks.map((chunk) => this.fetchVersionsFromHashesChunk(chunk))
+      ).pipe(map((results: any[]) => Object.assign({}, ...results)));
     }
 
     return this.fetchVersionsFromHashesChunk(uniqueHashes);
@@ -300,43 +311,43 @@ export class Modrinth extends BaseApiProvider {
     return this.scheduleRequest(() =>
       this.http
         .post<{ [hash: string]: ModrinthVersion | AnnotatedError }>(
-        url,
-        {
-          hashes: hashes,
-          algorithm: 'sha1'
-        },
-        { headers: this.headers, observe: 'response' }
-      )
+          url,
+          {
+            hashes: hashes,
+            algorithm: 'sha1'
+          },
+          { headers: this.headers, observe: 'response' }
+        )
         .pipe(
-        timeout(10000),
-        this.createRetryStrategy(3, 1000),
-        map((resp) => {
-          this.trackRateLimit(resp.headers);
-          let versions = resp.body!;
-          for (const hash of hashes) {
-            if (versions[hash] instanceof Object) {
-              versions[hash] = this.parseVersion(
-                versions[hash] as ModrinthVersion
-              );
-            } else {
-              versions[hash] = {
-                error: versions[hash] ?? {
-                  message: 'Hash not found',
-                  status: 404
-                }
-              } as unknown as AnnotatedError;
+          timeout(10000),
+          this.createRetryStrategy(3, 1000),
+          map((resp) => {
+            this.trackRateLimit(resp.headers);
+            let versions = resp.body!;
+            for (const hash of hashes) {
+              if (versions[hash] instanceof Object) {
+                versions[hash] = this.parseVersion(
+                  versions[hash] as ModrinthVersion
+                );
+              } else {
+                versions[hash] = {
+                  error: versions[hash] ?? {
+                    message: 'Hash not found',
+                    status: 404
+                  }
+                } as unknown as AnnotatedError;
+              }
             }
-          }
-          return versions;
-        }),
-        catchError((error) => {
-          const status = error?.status || 500;
-          const message = error?.message || 'Error fetching version files';
-          const errObj: AnnotatedError = { error: { message, status } };
-          const result: { [hash: string]: AnnotatedError } = {};
-          hashes.forEach((hash) => (result[hash] = errObj));
-          return of(result);
-        })
+            return versions;
+          }),
+          catchError((error) => {
+            const status = error?.status || 500;
+            const message = error?.message || 'Error fetching version files';
+            const errObj: AnnotatedError = { error: { message, status } };
+            const result: { [hash: string]: AnnotatedError } = {};
+            hashes.forEach((hash) => (result[hash] = errObj));
+            return of(result);
+          })
         )
     );
   }
@@ -407,15 +418,15 @@ export class Modrinth extends BaseApiProvider {
     return this.scheduleRequest(() =>
       this.http
         .get<SearchResult>(`${this.modrinthAPIUrl}/search`, {
-        params: httpParams
-      })
-      .pipe(
-        timeout(10000),
-        this.createRetryStrategy(3, 1000),
-        catchError((error) => {
-          // Wrap the error in an AnnotatedError and return it
-          return of({ error } as AnnotatedError);
+          params: httpParams
         })
+        .pipe(
+          timeout(10000),
+          this.createRetryStrategy(3, 1000),
+          catchError((error) => {
+            // Wrap the error in an AnnotatedError and return it
+            return of({ error } as AnnotatedError);
+          })
         )
     );
   }
@@ -454,7 +465,7 @@ export class Modrinth extends BaseApiProvider {
       versionId: json.versionId,
       dependencies: json.dependencies || [],
       game: json.game,
-      files: json.files.map((file: Modpack["files"][number]) => ({
+      files: json.files.map((file: Modpack['files'][number]) => ({
         ...file
       }))
     };

@@ -4,7 +4,7 @@
   >
     <div class="flex gap-x-5 overflow-y-auto">
       <div
-        class="min-w-16 min-h-16 flex flex-col justify-center sm:order-first"
+        class="flex min-h-16 min-w-16 flex-col justify-center sm:order-first"
       >
         @if (view == View.List && project.icon_url) {
           <a
@@ -207,7 +207,9 @@
             />
           </svg>
           @if (versions.length == 1) {
-            <p class="min-w-0 truncate text-sm text-gray-700 dark:text-slate-200">
+            <p
+              class="min-w-0 truncate text-sm text-gray-700 dark:text-slate-200"
+            >
               {{ selectedVersion.version_number }}
             </p>
           }
@@ -252,7 +254,7 @@
           }
         </div>
         <p
-          class="flex gap-x-1 text-sm text-gray-700 dark:text-slate-200 sm:w-48"
+          class="flex gap-x-1 text-sm text-gray-700 sm:w-48 dark:text-slate-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -273,7 +275,7 @@
           下载量
         </p>
         <p
-          class="flex items-center gap-x-1 text-sm text-gray-700 dark:text-slate-200 sm:w-48"
+          class="flex items-center gap-x-1 text-sm text-gray-700 sm:w-48 dark:text-slate-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -298,12 +300,16 @@
         </p>
       </div>
     </div>
-    @if (showChangelog) {
-      <div @slideInOut class="overflow-y-clip pt-2">
+    <div
+      [@slideInOut]="showChangelog && changelogReady ? 'open' : 'closed'"
+      class="overflow-hidden"
+    >
+      <div class="pt-2">
         <h4 class="text-2xl font-bold">更新日志：</h4>
         <markdown
           class="undo-preflight text-sm"
           [data]="selectedVersion.changelog"
+          (ready)="onChangelogReady()"
         ></markdown>
         <button
           (click)="toggleChangelog()"
@@ -328,7 +334,6 @@
           <span class="sr-only">查看更新日志</span>
         </button>
       </div>
-    }
+    </div>
   </div>
 }
-

@@ -1,10 +1,10 @@
 <button
   id="triangle"
-  class="group relative flex aspect-square h-24 w-24 justify-end bg-indigo-400 pr-4 pt-4 transition-colors dark:bg-indigo-500"
+  class="group relative flex aspect-square h-24 w-24 justify-end bg-stone-200/95 pr-4 pt-4 text-stone-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-500 focus-visible:ring-offset-2 dark:bg-slate-700/95 dark:text-slate-100"
   [ngClass]="
     showInfoSection
-      ? 'h-auto w-auto bg-indigo-500'
-      : 'hover:cursor-pointer hover:bg-indigo-500 focus:bg-indigo-500 dark:hover:bg-indigo-400'
+      ? 'h-auto w-auto bg-stone-100/95 dark:bg-slate-800/95'
+      : 'hover:cursor-pointer hover:bg-stone-300 focus:bg-stone-300 dark:hover:bg-slate-600 dark:focus:bg-slate-600'
   "
   (click)="toggleInfoSection()"
   [@openClose]="showInfoSectionTransition ? 'open' : 'closed'"
@@ -25,7 +25,7 @@
           ? ''
           : 'hidden'
       "
-      class="h-8 w-8 rotate-45 text-white transition-opacity group-hover:inline"
+      class="h-8 w-8 rotate-45 text-current transition-opacity group-hover:inline"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -56,16 +56,21 @@
           ? 'animate-pulse'
           : ''
       "
-      class="-ml-7 w-20 rotate-45 text-center text-white opacity-100 group-hover:hidden group-hover:opacity-0"
+      class="-ml-7 w-20 rotate-45 text-center text-current opacity-100 group-hover:hidden group-hover:opacity-0"
       aria-live="polite"
       role="status"
     >
       <span class="sr-only">令牌剩余</span>
       {{
-        this.modrinth.rateLimitLimit -
-          Math.max(this.modrinth.rateLimitRemaining, 0)
+        (this.modrinth.rateLimitLimit || 300) -
+          Math.max(
+            this.modrinth.rateLimitLimit
+              ? this.modrinth.rateLimitRemaining
+              : 300,
+            0
+          )
       }}
-      / {{ this.modrinth.rateLimitLimit }}
+      / {{ this.modrinth.rateLimitLimit || 300 }}
     </span>
   }
 </button>

@@ -28,7 +28,6 @@ import {
   ProjectType
 } from '../../libraries/modrinth/types.modrinth';
 import { sha1 } from 'js-sha1';
-import { saveAs } from 'file-saver';
 import { Loader, LoaderService } from '../../services/loader.service';
 import Swal from 'sweetalert2';
 import { ModrinthService } from '../../services/modrinth.service';
@@ -724,8 +723,11 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     }
 
     const uploadedMcVersion: string | null =
-      installedVersion.game_versions && installedVersion.game_versions.length > 0
-        ? installedVersion.game_versions[installedVersion.game_versions.length - 1]
+      installedVersion.game_versions &&
+      installedVersion.game_versions.length > 0
+        ? installedVersion.game_versions[
+            installedVersion.game_versions.length - 1
+          ]
         : null;
     return targetVersions.map((version) => {
       version.selected = version === targetVersions[0]; // Mark first version as selected
@@ -1113,22 +1115,24 @@ export class ModPanelComponent implements OnInit, OnDestroy {
         if (this.modrinth.isAnnotatedError(projectsMap)) {
           return of(true);
         }
-        const dependencyObservables = uniqueNewDependencyIds.map((projectId) => {
-          const projectData = projectsMap[projectId];
-          if (!projectData || this.modrinth.isAnnotatedError(projectData)) {
-            processedCount++;
-            progress$.next(processedCount / totalDependencies);
-            return of(null);
-          }
-          return from(
-            this.processDependencyWithProject(projectData, mcVersion)
-          ).pipe(
-            tap(() => {
+        const dependencyObservables = uniqueNewDependencyIds.map(
+          (projectId) => {
+            const projectData = projectsMap[projectId];
+            if (!projectData || this.modrinth.isAnnotatedError(projectData)) {
               processedCount++;
               progress$.next(processedCount / totalDependencies);
-            })
-          );
-        });
+              return of(null);
+            }
+            return from(
+              this.processDependencyWithProject(projectData, mcVersion)
+            ).pipe(
+              tap(() => {
+                processedCount++;
+                progress$.next(processedCount / totalDependencies);
+              })
+            );
+          }
+        );
         return forkJoin(dependencyObservables);
       }),
       map(() => true),
@@ -1193,11 +1197,10 @@ export class ModPanelComponent implements OnInit, OnDestroy {
    */
   downloadAll() {
     const files = this.availableMods
-      .map(
-        (mod) =>
-          mod.versions
-            .find((version) => version.selected)!
-            .files.find((f) => f.primary)!
+      .map((mod) =>
+        mod.versions
+          .find((version) => version.selected)!
+          .files.find((f) => f.primary)!
       )
       .flat();
     this.downloadMultiple(files);
@@ -1228,16 +1231,43 @@ export class ModPanelComponent implements OnInit, OnDestroy {
       didOpen: async () => {
         Swal.showLoading();
         try {
-          const response = await fetch('/api/download/archive', {
+          const response = await fetch('/api/download/archive/jobs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ files })
           });
           if (!response.ok) {
-            throw new Error('服务器打包下载失败');
+            const detail = await response.json().catch(() => null);
+            throw new Error(detail?.error || '服务器打包任务创建失败');
           }
-          saveAs(await response.blob(), 'minecraft-mods.zip');
-          const failureCount = Number(response.headers.get('X-Download-Failures') || 0);
+          let job = await response.json();
+          while (job.status === 'queued' || job.status === 'processing') {
+            Swal.update({
+              title: '正在下载并打包...',
+              html: `已处理 ${job.completed} / ${job.total} 个文件`
+            });
+            Swal.showLoading();
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const statusResponse = await fetch(
+              `/api/download/archive/jobs/${encodeURIComponent(job.id)}`,
+              {
+                cache: 'no-store'
+              }
+            );
+            if (!statusResponse.ok) throw new Error('无法获取服务器打包进度');
+            job = await statusResponse.json();
+          }
+          if (job.status !== 'ready' || !job.downloadUrl) {
+            throw new Error(job.error || '服务器打包下载失败');
+          }
+          const link = document.createElement('a');
+          link.href = job.downloadUrl;
+          link.download = 'minecraft-mods.zip';
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          const failureCount = Number(job.failures || 0);
           Swal.close();
           if (failureCount > 0) {
             await Swal.fire({
@@ -1276,7 +1306,6 @@ export class ModPanelComponent implements OnInit, OnDestroy {
       window.open(`https://modrinth.com/mod/${version.project.slug}`);
     }
   }
-
 }
 
 export interface ExtendedVersion extends ModrinthVersion {

@@ -22,7 +22,7 @@ export class VersionsService {
   }
 
   public init() {
-    const defaultVersion = '1.20.1';
+    const defaultVersion = '26.3';
     // Initially populate the list only with the previously selected version / default version
     this.versions$.next([
       {
@@ -30,7 +30,7 @@ export class VersionsService {
         selected: true,
         type: 'release'
       },
-      { version: 'Loading...', selected: false, type: 'release' }
+      { version: '加载中...', selected: false, type: 'release' }
     ]);
     // Get the list of all minecraft versions from Mojang
     this.http
