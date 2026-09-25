@@ -1203,42 +1203,6 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     this.downloadMultiple(files);
   }
 
-  /**
-   * Download all updated mods in the availableMods list
-   */
-  downloadUpdated() {
-    const updatedMods = this.availableMods.filter((mod) =>
-      mod.versions.some(
-        (version) =>
-          version.selected && version.versionStatus == VersionStatus.Updated
-      )
-    );
-
-    const files = updatedMods.map(
-      (mod) =>
-        mod.versions
-          .find(
-            (version) =>
-              version.selected && version.versionStatus == VersionStatus.Updated
-          )!
-          .files.find((f) => f.primary)!
-    );
-
-    if (files.length == 0) {
-      Swal.fire({
-        position: 'top-end',
-        icon: 'info',
-        title: '没有可更新的模组',
-        showConfirmButton: false,
-        timer: 2500,
-        backdrop: `rgba(0, 0, 0, 0.0)`,
-        ...this.getSwalTheme()
-      });
-      return;
-    }
-    this.downloadMultiple(files);
-  }
-
   private getSwalTheme() {
     const darkMode =
       document.documentElement.classList.contains('dark') ||

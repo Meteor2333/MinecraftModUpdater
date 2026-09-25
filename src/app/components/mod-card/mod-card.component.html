@@ -169,7 +169,7 @@
         </div>
       </div>
       <div
-        class="order-first flex flex-shrink flex-col items-center justify-center space-y-1 sm:order-last sm:items-start"
+        class="order-first flex w-56 min-w-48 max-w-56 shrink-0 flex-col items-center justify-center space-y-1 sm:order-last sm:items-start"
       >
         @if (view == View.List && project.icon_url) {
           <a
@@ -207,16 +207,16 @@
             />
           </svg>
           @if (versions.length == 1) {
-            <p class="text-sm text-gray-700 dark:text-slate-200">
+            <p class="min-w-0 truncate text-sm text-gray-700 dark:text-slate-200">
               {{ selectedVersion.version_number }}
             </p>
           }
           @if (versions.length > 1) {
-            <div class="">
-              <div class="flex flex-row">
+            <div class="min-w-0 flex-1">
+              <div class="relative flex min-w-0 flex-row">
                 <select
                   [(ngModel)]="selectedVersion"
-                  class="rounded-xl border border-gray-300 bg-white px-2 py-1 text-sm font-medium text-gray-700 dark:bg-slate-800 dark:text-slate-200"
+                  class="w-full min-w-0 appearance-none rounded-md border border-gray-200 bg-white px-2 py-1 pr-8 text-sm font-medium text-gray-700 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-blue-400"
                   aria-label="选择版本"
                 >
                   @for (mod of versions; track mod) {
@@ -232,6 +232,21 @@
                     </option>
                   }
                 </select>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                  class="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-slate-400"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
               </div>
             </div>
           }
@@ -257,11 +272,30 @@
           <span class="">{{ selectedVersion.downloads | shortNumber }}</span>
           下载量
         </p>
-        <a
-          href="{{ selectedVersion.files[0].url }}"
-          class="text-sm font-medium text-blue-500 hover:text-blue-700 hover:underline"
-          >下载</a
+        <p
+          class="flex items-center gap-x-1 text-sm text-gray-700 dark:text-slate-200 sm:w-48"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            class="h-4 w-4 shrink-0"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 3v12m0 0 4-4m-4 4-4-4m-4 8h16"
+            />
+          </svg>
+          <a
+            href="{{ selectedVersion.files[0].url }}"
+            class="text-sm font-semibold text-blue-500 hover:text-blue-700 hover:underline"
+            >下载</a
+          >
+        </p>
       </div>
     </div>
     @if (showChangelog) {

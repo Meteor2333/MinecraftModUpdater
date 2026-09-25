@@ -2,9 +2,8 @@
   (click)="notify.emit()"
   [disabled]="loading"
   [ngClass]="{
-    'cursor-wait bg-indigo-300': loading,
-    'bg-gradient-to-r from-indigo-400 to-purple-600 hover:from-indigo-400 hover:to-purple-700':
-      !loading
+  'cursor-wait bg-blue-300': loading,
+  'bg-blue-500 hover:bg-blue-600': !loading
   }"
   class="flex items-center justify-center gap-x-2 rounded-lg py-2 px-3 text-lg font-bold text-white"
 >

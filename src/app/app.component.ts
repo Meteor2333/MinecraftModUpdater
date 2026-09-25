@@ -18,7 +18,7 @@ import { CurseforgeSupportService } from './services/curseforgeSupport.service';
   standalone: false
 })
 export class AppComponent implements OnInit {
-  title = 'Minecraft Mod Updater';
+  title = 'Minecraft 模组更新器';
 
   constructor(
     private meta: Meta,
