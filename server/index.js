@@ -33,8 +33,8 @@ const DIST_ROOT = path.resolve(
   "browser"
 );
 
-let nextRequestAt = 0;
-let requestQueue = Promise.resolve();
+// Space Modrinth request starts without waiting for earlier responses to finish.
+const nextRequestAt = new Map();
 const cache = new Map();
 const archiveJobs = new Map();
 const allowedDownloadHosts = new Set([
@@ -147,35 +147,40 @@ function readRequestBody(request) {
   });
 }
 
-function waitForRateLimit() {
+function waitForRateLimit(origin) {
+  if (origin !== "https://api.modrinth.com") return Promise.resolve();
   const now = Date.now();
-  const waitMs = Math.max(0, nextRequestAt - now);
-  nextRequestAt = Math.max(now, nextRequestAt) + REQUEST_INTERVAL_MS;
+  const nextAt = nextRequestAt.get(origin) || 0;
+  const waitMs = Math.max(0, nextAt - now);
+  nextRequestAt.set(origin, Math.max(now, nextAt) + REQUEST_INTERVAL_MS);
   return new Promise((resolve) => setTimeout(resolve, waitMs));
 }
 
-function fetchModrinth(url, options) {
-  const task = requestQueue.then(async () => {
-    await waitForRateLimit();
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15_000);
-
-    try {
-      return await fetch(url, {
-        ...options,
-        dispatcher: ipv4Dispatcher,
-        signal: controller.signal
-      });
-    } finally {
-      clearTimeout(timeout);
-    }
+function fetchUpstream(url, options) {
+  const origin = new URL(url).origin;
+  const controller = new AbortController();
+  let timeout;
+  const timedOut = new Promise((_, reject) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      reject(new Error("Upstream request timed out"));
+    }, 15_000);
   });
+  const task = (async () => {
+    await waitForRateLimit(origin);
+    if (controller.signal.aborted) throw new Error("Upstream request timed out");
 
-  requestQueue = task.then(
-    () => undefined,
-    () => undefined
-  );
-  return task;
+    const response = await fetch(url, {
+      ...options,
+      dispatcher: ipv4Dispatcher,
+      signal: controller.signal
+    });
+    const body = Buffer.from(await response.arrayBuffer());
+    return { response, body };
+  })();
+  return Promise.race([task, timedOut]).finally(() => {
+    clearTimeout(timeout);
+  });
 }
 
 function getCacheKey(method, requestUrl) {
@@ -292,8 +297,9 @@ async function proxyExternalApi(request, response, requestUrl) {
   }
 
   let upstreamResponse;
+  let responseBody;
   try {
-    upstreamResponse = await fetchModrinth(upstreamUrl, {
+    ({ response: upstreamResponse, body: responseBody } = await fetchUpstream(upstreamUrl, {
       method: request.method,
       headers: {
         Accept: "application/json",
@@ -302,7 +308,7 @@ async function proxyExternalApi(request, response, requestUrl) {
         ...upstreamConfig.headers
       },
       body
-    });
+    }));
   } catch (error) {
     sendJson(response, 502, {
       error: "Modrinth request failed",
@@ -311,7 +317,6 @@ async function proxyExternalApi(request, response, requestUrl) {
     return;
   }
 
-  const responseBody = Buffer.from(await upstreamResponse.arrayBuffer());
   const headers = {
     "Content-Type":
       upstreamResponse.headers.get("content-type") || "application/json",
@@ -552,8 +557,9 @@ async function buildArchive(job, files) {
     await pipeline(
       zip.generateNodeStream({
         streamFiles: true,
-        compression: "DEFLATE",
-        compressionOptions: { level: 6 }
+        // Mod archives are already compressed. Deflating them again wastes
+        // CPU on the main Node.js thread and can delay unrelated API requests.
+        compression: "STORE"
       }),
       fs.createWriteStream(job.archivePath, { flags: "wx" })
     );

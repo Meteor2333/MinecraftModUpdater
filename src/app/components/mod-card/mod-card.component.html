@@ -2,31 +2,28 @@
   <div
     class="flex w-full flex-col rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 dark:text-slate-200"
   >
-    <div class="flex gap-x-5 overflow-y-auto">
-      <div
-        class="flex min-h-16 min-w-16 flex-col justify-center sm:order-first"
-      >
+    <div class="flex min-w-0 flex-col gap-3">
+      <div class="flex min-w-0 items-start gap-3 sm:gap-4">
         @if (view == View.List && project.icon_url) {
           <a
             href="https://modrinth.com/mod/{{ project.slug }}"
             target="_blank"
             rel="noopener"
             referrerpolicy="no-referrer"
-            class="hidden sm:block"
+            class="shrink-0"
             title="打开项目的 Modrinth 页面"
             tabindex="-1"
           >
             <img
               src="{{ project.icon_url }}"
               alt="{{ project.title }}"
-              class="aspect-square w-16 rounded-xl"
+              class="h-16 w-16 rounded-xl sm:h-20 sm:w-20"
               style="background-color: {{ project.color }}"
             />
           </a>
         }
-      </div>
-      <div class="order-last flex flex-grow flex-col sm:order-first">
-        <div class="flex flex-row items-baseline gap-x-1">
+        <div class="flex min-w-0 flex-grow flex-col">
+        <div class="flex min-w-0 flex-col items-start">
           <h2 class="text-lg font-bold dark:text-slate-100">
             <a
               class="hover:underline"
@@ -37,7 +34,7 @@
               >{{ project.title }}</a
             >
           </h2>
-          <p>
+          <p class="text-sm text-gray-600 dark:text-slate-300">
             by
             <a
               class="underline"
@@ -50,10 +47,13 @@
             >
           </p>
         </div>
-        <p class="text-gray-700 dark:text-slate-200">
+        </div>
+      </div>
+      <div class="flex min-w-0 flex-col gap-2">
+        <p class="break-words text-gray-700 dark:text-slate-200">
           {{ project.description }}
         </p>
-        <div class="flex flex-row gap-x-3 text-sm">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
           <span class="flex flex-wrap items-center gap-x-1">
             @if (project.server_side !== "unsupported") {
               <svg
@@ -169,27 +169,10 @@
         </div>
       </div>
       <div
-        class="order-first flex w-56 min-w-48 max-w-56 shrink-0 flex-col items-center justify-center space-y-1 sm:order-last sm:items-start"
+        class="flex w-full min-w-0 flex-col gap-2 border-t border-gray-300 pt-3 dark:border-slate-600 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2"
       >
-        @if (view == View.List && project.icon_url) {
-          <a
-            href="https://modrinth.com/mod/{{ project.slug }}"
-            target="_blank"
-            rel="noopener"
-            referrerpolicy="no-referrer"
-            class="aspect-square sm:hidden"
-            title="打开项目的 Modrinth 页面"
-            tabindex="-1"
-          >
-            <img
-              src="{{ project.icon_url }}"
-              alt="{{ project.title }}"
-              class="h-8 w-8 rounded-lg"
-            />
-          </a>
-        }
         <div
-          class="flex w-full flex-row items-center justify-center gap-x-1 sm:justify-start"
+          class="flex min-w-0 flex-row items-center gap-x-1 sm:w-56"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +237,7 @@
           }
         </div>
         <p
-          class="flex gap-x-1 text-sm text-gray-700 sm:w-48 dark:text-slate-200"
+          class="flex gap-x-1 text-sm text-gray-700 dark:text-slate-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -275,7 +258,7 @@
           下载量
         </p>
         <p
-          class="flex items-center gap-x-1 text-sm text-gray-700 sm:w-48 dark:text-slate-200"
+          class="flex items-center gap-x-1 text-sm text-gray-700 dark:text-slate-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -916,7 +916,9 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     }
 
     // Set chunk size and initialize counters
-    const CHUNK_SIZE = 30;
+    // Keep the number of active file pipelines below common HTTP/1.1
+    // per-origin connection limits so the browser does not queue requests.
+    const CHUNK_SIZE = 6;
     let processedCounter = 0;
     const totalToProcess = this.toProcess.length + modHashes.length;
     const percent$ = new Subject<number>();
@@ -1225,6 +1227,7 @@ export class ModPanelComponent implements OnInit, OnDestroy {
     const dialog = Swal.fire({
       title: '下载并打包中...',
       allowOutsideClick: false,
+      allowEscapeKey: false,
       showCancelButton: false,
       showConfirmButton: false,
       ...this.getSwalTheme(),

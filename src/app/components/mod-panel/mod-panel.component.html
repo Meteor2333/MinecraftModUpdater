@@ -1,4 +1,4 @@
-<div class="flex w-full flex-col items-center px-10">
+<div class="flex w-full min-w-0 flex-col items-center px-3 sm:px-6 lg:px-10">
   <app-start-button [loading]="this.loading" (notify)="startUpdateMods()" />
 
   <div class="mt-4 flex w-full flex-col">
@@ -8,18 +8,18 @@
       }
     </div>
     @if (availableMods.length > 0) {
-      <section class="space-y-4">
-        <div class="flex items-center justify-between space-x-3">
+      <section class="min-w-0 space-y-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-x-3">
           <p class="text-lg font-bold dark:text-slate-100">
             适用于所选版本的模组
           </p>
-          <div class="flex items-center space-x-2">
+          <div class="flex w-full items-center space-x-2 sm:w-auto">
             <!-- Search Input -->
             <div class="relative">
               <input
                 type="text"
                 placeholder="搜索结果..."
-                class="h-10 w-64 rounded-md pl-10 pr-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-gray-400 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-500 dark:hover:ring-slate-200"
+                class="h-10 w-full rounded-md pl-10 pr-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-gray-400 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-500 dark:hover:ring-slate-200 sm:w-64"
                 [(ngModel)]="searchTerm"
                 aria-label="搜索结果"
               />
@@ -58,7 +58,7 @@
           />
         }
         <div
-          class="flex justify-between rounded-lg bg-white px-4 py-2 dark:bg-slate-800 dark:text-slate-300"
+          class="flex flex-wrap justify-between gap-2 rounded-lg bg-white px-3 py-2 dark:bg-slate-800 dark:text-slate-300 sm:px-4"
         >
           <span class="flex items-center">
             <svg

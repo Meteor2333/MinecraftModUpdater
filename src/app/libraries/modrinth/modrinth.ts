@@ -14,8 +14,6 @@ import {
   filter,
   firstValueFrom,
   forkJoin,
-  from,
-  finalize,
   map,
   mergeMap,
   Observable,
@@ -51,8 +49,7 @@ export class Modrinth extends BaseApiProvider {
 
   private http = inject(HttpClient);
   private readonly requestIntervalMs = 220;
-  private requestQueue: Promise<void> = Promise.resolve();
-  private lastRequestStartedAt = 0;
+  private nextRequestAt = 0;
 
   protected override get _rateLimitInfo(): RateLimitInfo {
     return {
@@ -91,27 +88,14 @@ export class Modrinth extends BaseApiProvider {
     this.setupBuffering();
   }
 
-  /** Serializes Modrinth requests and keeps them below the public API limit. */
+  /** Spaces Modrinth request starts while allowing in-flight requests to overlap. */
   private scheduleRequest<T>(request: () => Observable<T>): Observable<T> {
     return defer(() => {
-      const previousRequest = this.requestQueue;
-      let releaseRequest!: () => void;
-      this.requestQueue = new Promise<void>((resolve) => {
-        releaseRequest = resolve;
-      });
+      const now = Date.now();
+      const waitMs = Math.max(0, this.nextRequestAt - now);
+      this.nextRequestAt = Math.max(now, this.nextRequestAt) + this.requestIntervalMs;
 
-      return from(previousRequest).pipe(
-        mergeMap(() => {
-          const elapsed = Date.now() - this.lastRequestStartedAt;
-          const waitMs = Math.max(0, this.requestIntervalMs - elapsed);
-          return timer(waitMs);
-        }),
-        mergeMap(() => {
-          this.lastRequestStartedAt = Date.now();
-          return request();
-        }),
-        finalize(() => releaseRequest())
-      );
+      return timer(waitMs).pipe(mergeMap(() => request()));
     });
   }
 
